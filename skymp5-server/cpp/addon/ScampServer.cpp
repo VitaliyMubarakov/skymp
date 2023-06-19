@@ -24,6 +24,8 @@
 #include <napi.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
+#include "module.h"
+
 namespace {
 std::shared_ptr<spdlog::logger>& GetLogger()
 {
@@ -98,6 +100,11 @@ Napi::Object ScampServer::Init(Napi::Env env, Napi::Object exports)
   constructor = Napi::Persistent(func);
   constructor.SuppressDestruct();
   exports.Set("ScampServer", func);
+
+  std::cout << "joja" << std::endl;  
+
+  Modules::Module::Invoke();
+
   return exports;
 }
 
