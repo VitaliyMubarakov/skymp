@@ -30,15 +30,30 @@ struct MpActor::Impl
     { espm::ActorValue::Stamina, std::chrono::steady_clock::time_point{} },
     { espm::ActorValue::Magicka, std::chrono::steady_clock::time_point{} },
   };
+  uint32_t blockActiveCount = 0;
 };
 
 MpActor::MpActor(const LocationalData& locationalData_,
-                 const FormCallbacks& callbacks_,
-                 std::optional<MpChangeForm> changeForm, uint32_t optBaseId)
+                 const FormCallbacks& callbacks_, uint32_t optBaseId)
   : MpObjectReference(locationalData_, callbacks_,
-                      optBaseId == 0 ? 0x7 : optBaseId, "NPC_", changeForm)
+                      optBaseId == 0 ? 0x7 : optBaseId, "NPC_")
 {
   pImpl.reset(new Impl);
+}
+
+void MpActor::IncreaseBlockCount() noexcept
+{
+  ++pImpl->blockActiveCount;
+}
+
+void MpActor::ResetBlockCount() noexcept
+{
+  pImpl->blockActiveCount = 0;
+}
+
+uint32_t MpActor::GetBlockCount() const noexcept
+{
+  return pImpl->blockActiveCount;
 }
 
 void MpActor::SetRaceMenuOpen(bool isOpen)
@@ -483,9 +498,9 @@ void MpActor::BeforeDestroy()
   UnsubscribeFromAll();
 }
 
-void MpActor::Init(WorldState* worldState, uint32_t formId)
+void MpActor::Init(WorldState* worldState, uint32_t formId, bool hasChangeForm)
 {
-  MpObjectReference::Init(worldState, formId);
+  MpObjectReference::Init(worldState, formId, hasChangeForm);
 
   if (worldState->HasEspm()) {
     EnsureBaseContainerAdded(GetParent()->GetEspm());

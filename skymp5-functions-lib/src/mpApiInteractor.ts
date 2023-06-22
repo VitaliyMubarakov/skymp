@@ -1,5 +1,5 @@
-import { Counter, Percentages, PlayerController } from "./logic/PlayerController";
 import { GameModeListener } from "./logic/listeners/gameModeListener";
+import { Counter, Percentages, PlayerController } from "./logic/PlayerController";
 import { SweetPieRound } from "./logic/listeners/sweetpie/SweetPieRound";
 import { ChatMessage, ChatNeighbor, ChatProperty } from "./props/chatProperty";
 import { CounterProperty } from "./props/counterProperty";
@@ -246,22 +246,22 @@ export class MpApiInteractor {
       getProfileId(playerActorId: number): number {
         return mp.get(playerActorId, 'profileId');
       },
-      addItem(actorId: number, itemId: number, count: number): void {
+      addItem(actorId: number, itemId: number, count: number, silent = false): void {
         mp.callPapyrusFunction(
           'method',
           'ObjectReference',
           'AddItem',
           { type: 'form', desc: mp.getDescFromId(actorId) },
-          [{ type: 'espm', desc: mp.getDescFromId(itemId) }, count, /*silent*/ false]
+          [{ type: 'espm', desc: mp.getDescFromId(itemId) }, count, silent]
         );
       },
-      removeItem(actorId: number, itemId: number, count: number, akOtherContainer: number | null): void {
+      removeItem(actorId: number, itemId: number, count: number, akOtherContainer: number | null, silent = false): void {
         mp.callPapyrusFunction(
           'method',
           'ObjectReference',
           'RemoveItem',
           { type: 'form', desc: mp.getDescFromId(actorId) },
-          [{ type: 'espm', desc: mp.getDescFromId(itemId) }, count, /*silent*/ false, akOtherContainer || null]
+          [{ type: 'espm', desc: mp.getDescFromId(itemId) }, count, silent, akOtherContainer || null]
         );
       },
       getRoundsArray(): SweetPieRound[] {
