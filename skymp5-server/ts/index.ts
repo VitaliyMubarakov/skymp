@@ -27,6 +27,7 @@ import * as path from "path";
 import * as os from "os";
 
 import * as manifestGen from "./manifestGen";
+import { ModulesSystem } from "./modules/modules";
 
 const {
   master,
@@ -144,6 +145,8 @@ const main = async () => {
   setupStreams(server);
   console.log(`Current process ID is ${pid}`);
 
+  ModulesSystem.init(ctx);
+
   (async () => {
     while (1) {
       try {
@@ -154,6 +157,8 @@ const main = async () => {
       }
     }
   })();
+
+  
 
   for (const system of systems) {
     if (system.initAsync) await system.initAsync(ctx);
