@@ -3,6 +3,8 @@ declare interface JSModule {
   description?: string;
   author?: string;
   version?: string;
+
+  onServerConnect?(userId: number): void;
 }
 
 declare function addJSModule(module: JSModule);

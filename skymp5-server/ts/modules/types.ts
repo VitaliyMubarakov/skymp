@@ -3,4 +3,6 @@ export interface JSModule {
   description?: string;
   author?: string;
   version?: string;
+
+  onServerConnect?(userId: number): void;
 }

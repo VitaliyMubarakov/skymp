@@ -13,7 +13,7 @@ import * as os from "os";
 
 import * as manifestGen from "../manifestGen";
 import { ScampServer } from "../scampNative";
-import { JSModule } from "./types/types";
+import { JSModule } from "./types";
 
 interface SystemContext {
   svr: ScampServer;
@@ -33,6 +33,12 @@ let addJSModule = (module: JSModule) => modulesList.push(module);
 export class ModulesSystem {
   static ctx: SystemContext;
   static actorId: number;
+
+  static initEvents() {
+    this.ctx.svr.on("connect", (userId: number) =>
+      modulesList.forEach((module) => module.onServerConnect(userId))
+    );
+  }
 
   static init(ctx: SystemContext) {
     console.log("-- Инициалищия данных! --");
@@ -58,6 +64,8 @@ export class ModulesSystem {
 
       eval(fs.readFileSync("./" + moduleJSPath, "utf8"));
     });
+
+    this.initEvents();
 
     ctx.gm.on(
       "spawnAllowed",
