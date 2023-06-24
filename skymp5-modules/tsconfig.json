@@ -2,6 +2,8 @@
   "compilerOptions": {
     "rootDir": "",
     "outDir": "../server/data",
-    "typeRoots": ["./types/index.d.ts"]
-  }
+    "typeRoots": ["./types/index.d.ts"],
+    "resolveJsonModule": true
+  },
+  "include": ["modules", "types"]
 }

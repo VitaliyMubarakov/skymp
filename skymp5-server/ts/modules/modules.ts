@@ -13,6 +13,7 @@ import * as os from "os";
 
 import * as manifestGen from "../manifestGen";
 import { ScampServer } from "../scampNative";
+import { JSModule } from "./types/types";
 
 interface SystemContext {
   svr: ScampServer;
@@ -26,6 +27,8 @@ function getActorName(): string {
 
 let Directory = "./data/modules";
 
+let modulesList: JSModule[] = [];
+let addJSModule = (module: JSModule) => modulesList.push(module);
 
 export class ModulesSystem {
   static ctx: SystemContext;
@@ -38,11 +41,11 @@ export class ModulesSystem {
 
     let modulesPath: string[] = [];
 
-    fs.readdirSync(Directory, 'utf8').forEach((moduleFolderName: any) => {
+    fs.readdirSync(Directory, "utf8").forEach((moduleFolderName: any) => {
       const Absolute = path.join(Directory, moduleFolderName);
       if (!fs.statSync(Absolute).isDirectory()) return;
 
-      fs.readdirSync(Absolute, 'utf8').forEach((moduleFileName: any) => {
+      fs.readdirSync(Absolute, "utf8").forEach((moduleFileName: any) => {
         const modulePath = path.join(Absolute, moduleFileName);
         const fileExtension = path.extname(modulePath);
 
@@ -53,26 +56,20 @@ export class ModulesSystem {
     modulesPath.forEach((moduleJSPath) => {
       console.log(moduleJSPath);
 
-      eval(fs.readFileSync("./" + moduleJSPath, 'utf8'));
-    });
-  
-    
-      
-    ctx.gm.on("spawnAllowed", (userId: number, userProfileId: number, discordRoleIds: string[]) => {
-      let actorId = ctx.svr.getActorsByProfileId(userProfileId)[0];
-
-      if (actorId) this.actorId = actorId;
-
-      console.log("-- Инициалищия модулей! --");
-
-
-      
-
-
-      //eval(fs.readFileSync("./data/modules/index.js", 'utf8'));
+      eval(fs.readFileSync("./" + moduleJSPath, "utf8"));
     });
 
+    ctx.gm.on(
+      "spawnAllowed",
+      (userId: number, userProfileId: number, discordRoleIds: string[]) => {
+        let actorId = ctx.svr.getActorsByProfileId(userProfileId)[0];
 
-    
+        if (actorId) this.actorId = actorId;
+
+        console.log("-- Инициалищия модулей! --");
+
+        //eval(fs.readFileSync("./data/modules/index.js", 'utf8'));
+      }
+    );
   }
 }
