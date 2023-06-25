@@ -20,52 +20,29 @@ interface SystemContext {
   gm: EventEmitter;
 }
 
-function getActorName(): string {
-  console.log(ModulesSystem.actorId);
-  return ModulesSystem.ctx.svr.getActorName(ModulesSystem.actorId);
-}
-
 let Directory = "./data/modules";
-
+let modulesPath: string[] = [];
 let modulesList: JSModule[] = [];
+
 let addJSModule = (module: JSModule) => modulesList.push(module);
 
 export class ModulesSystem {
-  static ctx: SystemContext;
-  static actorId: number;
+  ctx: SystemContext;
+  actorId: number;
 
-  static initEvents() {
-    this.ctx.svr.on("connect", (userId: number) =>
-      modulesList.forEach((module) => module.onServerConnect(userId))
-    );
+  isFirstWatchPlugins: any = {};
+
+  getActorName(): string {
+    console.log(this.actorId);
+    return this.ctx.svr.getActorName(this.actorId);
   }
 
-  static init(ctx: SystemContext) {
+  constructor(ctx: SystemContext) {
     console.log("-- Инициалищия данных! --");
 
     this.ctx = ctx;
-
-    let modulesPath: string[] = [];
-
-    fs.readdirSync(Directory, "utf8").forEach((moduleFolderName: any) => {
-      const Absolute = path.join(Directory, moduleFolderName);
-      if (!fs.statSync(Absolute).isDirectory()) return;
-
-      fs.readdirSync(Absolute, "utf8").forEach((moduleFileName: any) => {
-        const modulePath = path.join(Absolute, moduleFileName);
-        const fileExtension = path.extname(modulePath);
-
-        if (fileExtension == ".js") modulesPath.push(modulePath);
-      });
-    });
-
-    modulesPath.forEach((moduleJSPath) => {
-      console.log(moduleJSPath);
-
-      eval(fs.readFileSync("./" + moduleJSPath, "utf8"));
-    });
-
-    this.initEvents();
+    //this.ReloadModules();
+    this.initHotReload();
 
     ctx.gm.on(
       "spawnAllowed",
@@ -76,8 +53,75 @@ export class ModulesSystem {
 
         console.log("-- Инициалищия модулей! --");
 
-        //eval(fs.readFileSync("./data/modules/index.js", 'utf8'));
+        setTimeout(() => {
+          this.ReloadModules();
+        }, 1000 * 120);
       }
     );
+  }
+
+  initEvents() {
+    this.ctx.svr.on("connect", (userId: number) =>
+      modulesList.forEach((module) => module.onServerConnect(userId))
+    );
+  }
+
+  initHotReload() {
+    const moduleWatcherHandle = (path: string) => {
+      if (!this.isFirstWatchPlugins[path]) {
+        this.isFirstWatchPlugins[path] = true;
+        return;
+      }
+
+      console.log("Module was updated: ", path);
+
+      //this.ReloadModules();
+    };
+
+    const moduleWatcher = chokidar.watch(path.join("data", "modules"), {
+      ignored: /^\./,
+      persistent: true,
+      awaitWriteFinish: true,
+    });
+
+    moduleWatcher.on("add", moduleWatcherHandle);
+    moduleWatcher.on("addDir", moduleWatcherHandle);
+    moduleWatcher.on("change", moduleWatcherHandle);
+    moduleWatcher.on("unlink", moduleWatcherHandle);
+    moduleWatcher.on("error", (error) => {
+      console.error("Error happened in chokidar watch", error);
+    });
+  }
+
+  ReloadModules() {
+    modulesList = [];
+    modulesPath = [];
+
+    console.log("Модули очищены");
+
+    //получаем файлы модулей
+    fs.readdirSync(Directory, "utf8").forEach((moduleFolderName: any) => {
+      const Absolute = path.join(Directory, moduleFolderName);
+      if (!fs.statSync(Absolute).isDirectory()) return;
+
+      fs.readdirSync(Absolute, "utf8").forEach((moduleFileName: any) => {
+        const modulePath = path.join(Absolute, moduleFileName);
+
+        const fileExtension = path.extname(modulePath);
+
+        if (fileExtension == ".js") modulesPath.push(modulePath);
+      });
+    });
+
+    //проходимся по index'ам  и запускаем
+    modulesPath.forEach((moduleJSPath) => {
+      console.log(moduleJSPath);
+
+      eval(fs.readFileSync("./" + moduleJSPath, "utf8"));
+    });
+
+    this.initEvents();
+
+    console.log("Модули загружены!");
   }
 }

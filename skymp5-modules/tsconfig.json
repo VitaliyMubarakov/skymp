@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
-    "rootDir": "",
-    "outDir": "../server/data",
-    "typeRoots": ["./types/index.d.ts"],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noEmitOnError": true
   },
   "include": ["modules", "types"]
 }

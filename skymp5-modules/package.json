@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "build": "node bundler.js"
+    "build": "node bundler.js",
+    "watch": "node bundler.js -watch true"
   },
   "keywords": [],
   "author": "Gachi Team",
@@ -16,7 +17,8 @@
     "esbuild": "^0.18.6",
     "ts-jest": "^27.1.4",
     "typescript": "^4.6.3",
-    "node-args-parser": "^0.0.1"
+    "node-args-parser": "^0.0.1",
+    "node-watch": "^0.7.3"
   },
   "dependencies": {
     "@types/gettext-parser": "^4.0.1",
