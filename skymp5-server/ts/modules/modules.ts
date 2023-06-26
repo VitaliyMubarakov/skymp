@@ -13,7 +13,7 @@ import * as os from "os";
 import chalk from "chalk";
 import * as manifestGen from "../manifestGen";
 import { ScampServer } from "../scampNative";
-import { JSModule } from "./types";
+import { BuildType, JSModule } from "./types";
 
 interface SystemContext {
   svr: ScampServer;
@@ -36,6 +36,13 @@ function getModuleByPath(path: string) {
   return index != -1 ? modulesList[index] : null;
 }
 
+declare let process: { hrtime: () => any };
+
+function now() {
+  const hrTime = process.hrtime();
+  return hrTime[0] * 1000 + hrTime[1] / 1000000;
+}
+
 export class ModulesSystem {
   ctx: SystemContext;
 
@@ -45,7 +52,12 @@ export class ModulesSystem {
     console.log("Modules initialization!");
 
     this.ctx = ctx;
-    this.ReloadModules();
+    let reloadInfo: BuildType = this.ReloadModules();
+    console.log("- Modules was Build in: ", reloadInfo.time, " ms.");
+    console.log("- Loaded modules count: ", modulesList.length);
+    reloadInfo.modules.forEach((e) => {
+      console.log("    • ", e.GetInfo());
+    });
     this.initHotReload();
   }
 
@@ -55,14 +67,33 @@ export class ModulesSystem {
     );
   }
 
+  isModuleChange: boolean = false;
+  modulesToRebuild: string[] = [];
+
   initHotReload() {
     const moduleWatcherHandle = (path: string) => {
       if (!this.isFirstWatchPlugins[path]) {
         this.isFirstWatchPlugins[path] = true;
         return;
       }
+      if (this.modulesToRebuild.indexOf(path) == -1)
+        this.modulesToRebuild.push(path);
 
-      this.ReloadModules([path]);
+      if (this.isModuleChange) return;
+
+      this.isModuleChange = true;
+
+      setTimeout(() => {
+        let reloadInfo: BuildType = this.ReloadModules(this.modulesToRebuild);
+
+        console.log("- Modules was rebuild in: ", reloadInfo.time, " ms.");
+        console.log("- Updated modules count: ", reloadInfo.num);
+        reloadInfo.modules.forEach((e) => {
+          console.log("    • ", e.GetInfo());
+        });
+
+        console.log("- Loaded modules count: ", modulesList.length);
+      }, 2000);
     };
 
     const moduleWatcher = chokidar.watch(path.join("data", "modules"), {
@@ -71,16 +102,26 @@ export class ModulesSystem {
       awaitWriteFinish: true,
     });
 
-    moduleWatcher.on("add", moduleWatcherHandle);
-    moduleWatcher.on("addDir", moduleWatcherHandle);
-    moduleWatcher.on("change", moduleWatcherHandle);
-    moduleWatcher.on("unlink", moduleWatcherHandle);
     moduleWatcher.on("error", (error) => {
       console.error("Error happened in chokidar watch", error);
     });
+
+    moduleWatcher.on("all", (event, path) => {
+      if (
+        event == "add" ||
+        event == "addDir" ||
+        event == "change" ||
+        event == "unlink"
+      ) {
+        moduleWatcherHandle(path);
+      }
+    });
   }
 
-  ReloadModules(modulesToReload: string[] = null) {
+  startTime = 0;
+
+  ReloadModules(modulesToReload: string[] = null): BuildType {
+    this.startTime = now();
     let updatedModulesCount = 0;
 
     if (
@@ -90,15 +131,14 @@ export class ModulesSystem {
     ) {
       modulesList = modulesList.filter((e) => {
         let moduleToClear = modulesToReload.indexOf(e.path) == -1;
-        if (moduleToClear)
-          console.log(`Module ${chalk.underline(e.moduleName)} is cleared`);
 
         return moduleToClear;
       });
     } else {
       modulesList = [];
-      console.log("Modules cleared");
     }
+
+    let currentModule: JSModule[] = [];
 
     //получаем файлы модулей
     fs.readdirSync(Directory, "utf8").forEach((moduleFolderName: any) => {
@@ -119,18 +159,21 @@ export class ModulesSystem {
 
         if (fileExtension == ".js") {
           updatedModulesCount++;
-          this.LoadModule(modulePath);
+          currentModule.push(this.LoadModule(modulePath));
         }
       });
     });
 
     this.initEvents();
 
-    console.log("- Updated modules count: ", updatedModulesCount);
-    console.log("- Loaded modules count: ", modulesList.length);
+    return {
+      num: updatedModulesCount,
+      time: now() - this.startTime,
+      modules: currentModule,
+    };
   }
 
-  LoadModule(moduleJSPath: string) {
+  LoadModule(moduleJSPath: string): JSModule {
     const moduleName = moduleJSPath
       .replace("data\\modules\\", "")
       .replace("\\index.js", "");
@@ -142,13 +185,13 @@ export class ModulesSystem {
           `error when initialize module ${moduleName}`,
           'module doesn`t have "addJSModule"'
         );
-        return false;
+        return null;
       }
       eval(fs.readFileSync("./" + moduleJSPath, "utf8"));
-      return true;
+      return modulesList[modulesList.length - 1];
     } catch (err) {
       console.error(`error when initialize module ${moduleName}`, err);
-      return false;
+      return null;
     }
   }
 }

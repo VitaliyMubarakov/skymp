@@ -5,6 +5,8 @@ declare interface JSModule {
   version?: string;
   path?: string;
 
+  GetInfo(): string;
+
   onServerConnect?(userId: number): void;
 }
 
