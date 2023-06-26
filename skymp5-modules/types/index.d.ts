@@ -3,8 +3,11 @@ declare interface JSModule {
   description?: string;
   author?: string;
   version?: string;
+  path?: string;
 
   onServerConnect?(userId: number): void;
 }
 
-declare function addJSModule(module: JSModule);
+declare let moduleJSPath: string;
+
+declare function addJSModule(module: JSModule, path: string);

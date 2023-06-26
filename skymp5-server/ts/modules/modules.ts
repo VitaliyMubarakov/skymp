@@ -10,7 +10,7 @@ import * as fs from "fs";
 import * as chokidar from "chokidar";
 import * as path from "path";
 import * as os from "os";
-
+import chalk from "chalk";
 import * as manifestGen from "../manifestGen";
 import { ScampServer } from "../scampNative";
 import { JSModule } from "./types";
@@ -21,43 +21,32 @@ interface SystemContext {
 }
 
 let Directory = "./data/modules";
-let modulesPath: string[] = [];
 let modulesList: JSModule[] = [];
 
-let addJSModule = (module: JSModule) => modulesList.push(module);
+function addJSModule(module: JSModule, path: string) {
+  module.path = path;
+  modulesList.push(module);
+}
+
+function getModuleByPath(path: string) {
+  let index: number = modulesList.findIndex((e) => {
+    e.path == path;
+  });
+
+  return index != -1 ? modulesList[index] : null;
+}
 
 export class ModulesSystem {
   ctx: SystemContext;
-  actorId: number;
 
   isFirstWatchPlugins: any = {};
 
-  getActorName(): string {
-    console.log(this.actorId);
-    return this.ctx.svr.getActorName(this.actorId);
-  }
-
   constructor(ctx: SystemContext) {
-    console.log("-- Инициалищия данных! --");
+    console.log("Modules initialization!");
 
     this.ctx = ctx;
-    //this.ReloadModules();
+    this.ReloadModules();
     this.initHotReload();
-
-    ctx.gm.on(
-      "spawnAllowed",
-      (userId: number, userProfileId: number, discordRoleIds: string[]) => {
-        let actorId = ctx.svr.getActorsByProfileId(userProfileId)[0];
-
-        if (actorId) this.actorId = actorId;
-
-        console.log("-- Инициалищия модулей! --");
-
-        setTimeout(() => {
-          this.ReloadModules();
-        }, 1000 * 120);
-      }
-    );
   }
 
   initEvents() {
@@ -73,9 +62,7 @@ export class ModulesSystem {
         return;
       }
 
-      console.log("Module was updated: ", path);
-
-      //this.ReloadModules();
+      this.ReloadModules([path]);
     };
 
     const moduleWatcher = chokidar.watch(path.join("data", "modules"), {
@@ -93,11 +80,25 @@ export class ModulesSystem {
     });
   }
 
-  ReloadModules() {
-    modulesList = [];
-    modulesPath = [];
+  ReloadModules(modulesToReload: string[] = null) {
+    let updatedModulesCount = 0;
 
-    console.log("Модули очищены");
+    if (
+      modulesToReload &&
+      modulesToReload.length > 0 &&
+      modulesList.length > 0
+    ) {
+      modulesList = modulesList.filter((e) => {
+        let moduleToClear = modulesToReload.indexOf(e.path) == -1;
+        if (moduleToClear)
+          console.log(`Module ${chalk.underline(e.moduleName)} is cleared`);
+
+        return moduleToClear;
+      });
+    } else {
+      modulesList = [];
+      console.log("Modules cleared");
+    }
 
     //получаем файлы модулей
     fs.readdirSync(Directory, "utf8").forEach((moduleFolderName: any) => {
@@ -107,21 +108,47 @@ export class ModulesSystem {
       fs.readdirSync(Absolute, "utf8").forEach((moduleFileName: any) => {
         const modulePath = path.join(Absolute, moduleFileName);
 
+        if (
+          modulesToReload &&
+          modulesToReload.length > 0 &&
+          modulesToReload.indexOf(modulePath) == -1
+        )
+          return;
+
         const fileExtension = path.extname(modulePath);
 
-        if (fileExtension == ".js") modulesPath.push(modulePath);
+        if (fileExtension == ".js") {
+          updatedModulesCount++;
+          this.LoadModule(modulePath);
+        }
       });
-    });
-
-    //проходимся по index'ам  и запускаем
-    modulesPath.forEach((moduleJSPath) => {
-      console.log(moduleJSPath);
-
-      eval(fs.readFileSync("./" + moduleJSPath, "utf8"));
     });
 
     this.initEvents();
 
-    console.log("Модули загружены!");
+    console.log("- Updated modules count: ", updatedModulesCount);
+    console.log("- Loaded modules count: ", modulesList.length);
+  }
+
+  LoadModule(moduleJSPath: string) {
+    const moduleName = moduleJSPath
+      .replace("data\\modules\\", "")
+      .replace("\\index.js", "");
+
+    try {
+      const moduleCode: string = fs.readFileSync(moduleJSPath).toString();
+      if (!moduleCode.includes("addJSModule")) {
+        console.error(
+          `error when initialize module ${moduleName}`,
+          'module doesn`t have "addJSModule"'
+        );
+        return false;
+      }
+      eval(fs.readFileSync("./" + moduleJSPath, "utf8"));
+      return true;
+    } catch (err) {
+      console.error(`error when initialize module ${moduleName}`, err);
+      return false;
+    }
   }
 }
