@@ -85,6 +85,8 @@ export class ModulesSystem {
 
       setTimeout(() => {
         let reloadInfo: BuildType = this.ReloadModules(this.modulesToRebuild);
+        this.modulesToRebuild = [];
+        this.isModuleChange = false;
 
         console.log("- Modules was rebuild in: ", reloadInfo.time, " ms.");
         console.log("- Updated modules count: ", reloadInfo.num);
