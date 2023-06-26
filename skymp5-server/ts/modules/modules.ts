@@ -47,17 +47,21 @@ export class ModulesSystem {
   ctx: SystemContext;
 
   isFirstWatchPlugins: any = {};
+  isModuleChange: boolean = false;
+  modulesToRebuild: string[] = [];
 
   constructor(ctx: SystemContext) {
-    console.log("Modules initialization!");
+    console.log("Modules System initialization!");
 
     this.ctx = ctx;
+
     let reloadInfo: BuildType = this.ReloadModules();
     console.log("- Modules was Build in: ", reloadInfo.time, " ms.");
     console.log("- Loaded modules count: ", modulesList.length);
     reloadInfo.modules.forEach((e) => {
       console.log("    • ", e.GetInfo());
     });
+
     this.initHotReload();
   }
 
@@ -67,15 +71,13 @@ export class ModulesSystem {
     );
   }
 
-  isModuleChange: boolean = false;
-  modulesToRebuild: string[] = [];
-
   initHotReload() {
     const moduleWatcherHandle = (path: string) => {
       if (!this.isFirstWatchPlugins[path]) {
         this.isFirstWatchPlugins[path] = true;
         return;
       }
+
       if (this.modulesToRebuild.indexOf(path) == -1)
         this.modulesToRebuild.push(path);
 
@@ -95,7 +97,7 @@ export class ModulesSystem {
         });
 
         console.log("- Loaded modules count: ", modulesList.length);
-      }, 2000);
+      }, 500);
     };
 
     const moduleWatcher = chokidar.watch(path.join("data", "modules"), {
@@ -120,10 +122,8 @@ export class ModulesSystem {
     });
   }
 
-  startTime = 0;
-
   ReloadModules(modulesToReload: string[] = null): BuildType {
-    this.startTime = now();
+    let startTime = now();
     let updatedModulesCount = 0;
 
     if (
@@ -170,7 +170,7 @@ export class ModulesSystem {
 
     return {
       num: updatedModulesCount,
-      time: now() - this.startTime,
+      time: Math.round(now() - startTime),
       modules: currentModule,
     };
   }
