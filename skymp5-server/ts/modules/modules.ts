@@ -36,8 +36,6 @@ function getModuleByPath(path: string) {
   return index != -1 ? modulesList[index] : null;
 }
 
-declare let process: { hrtime: () => any };
-
 function now() {
   const hrTime = process.hrtime();
   return hrTime[0] * 1000 + hrTime[1] / 1000000;
