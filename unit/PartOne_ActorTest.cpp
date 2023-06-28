@@ -172,6 +172,7 @@ TEST_CASE("Destroying actor in disconnect event handler", "[PartOne]")
   {
   public:
     void OnConnect(Networking::UserId userId) override {}
+    
     void OnDisconnect(Networking::UserId userId) override
     {
       REQUIRE(partOne.serverState.UserByActor(&ac) == 0);
@@ -187,6 +188,7 @@ TEST_CASE("Destroying actor in disconnect event handler", "[PartOne]")
     {
       return true;
     }
+    void OnActivate(int caster, int target) override {}
   };
 
   partOne.AddListener(std::shared_ptr<PartOne::Listener>(new Listener));

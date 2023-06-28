@@ -274,6 +274,8 @@ void ActionListener::OnActivate(const RawMessageData& rawMsgData,
   auto it = partOne.worldState.hosters.find(caster);
   auto hosterId = it == partOne.worldState.hosters.end() ? 0 : it->second;
 
+
+
   if (caster != 0x14) {
     if (hosterId != ac->GetFormId()) {
       std::stringstream ss;
@@ -294,6 +296,9 @@ void ActionListener::OnActivate(const RawMessageData& rawMsgData,
   if (hosterId) {
     RecalculateWorn(partOne.worldState.GetFormAt<MpObjectReference>(caster));
   }
+
+  for (auto& listener : partOne.worldState.listeners)
+    listener->OnActivate(caster, target);
 }
 
 void ActionListener::OnPutItem(const RawMessageData& rawMsgData,

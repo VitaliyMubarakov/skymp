@@ -8,6 +8,7 @@ export interface JSModule {
   GetInfo(): string;
 
   onServerConnect?(userId: number): void;
+  onActivate?(caster: number, target: number): void;
 }
 
 export type BuildType = { num: number; time: number; modules: JSModule[] };

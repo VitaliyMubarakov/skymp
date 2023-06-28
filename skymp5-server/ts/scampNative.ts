@@ -13,6 +13,7 @@ export type SendChatMessageFn = (
 export declare class ScampServer {
   constructor(serverPort: number, maxPlayers: number);
 
+  on(event: "activate", handler: (caster: number, target: number) => void): void;
   on(event: "connect", handler: (userId: number) => void): void;
   on(event: "disconnect", handler: (userId: number) => void): void;
   on(

@@ -37,6 +37,16 @@ void ScampServerListener::OnCustomPacket(Networking::UserId userId,
               Napi::String::New(env, contentStr) });
 }
 
+void ScampServerListener::OnActivate(int caster, int target)
+{
+  auto& env = server.tickEnv;
+  auto emit = server.emit.Value();
+  emit.Call(server.emitter.Value(),
+            { Napi::String::New(env, "activate"),
+              Napi::Number::New(env, caster),
+              Napi::Number::New(env, target) });
+}
+
 bool ScampServerListener::OnMpApiEvent(
   const char* eventName, std::optional<simdjson::dom::element> args,
   std::optional<uint32_t> formId)

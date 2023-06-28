@@ -67,7 +67,11 @@ export class ModulesSystem {
 
   initEvents() {
     this.ctx.svr.on("connect", (userId: number) =>
-      modulesList.forEach((module) => module.onServerConnect(userId))
+      modulesList.forEach((module) => { if (module.onServerConnect) module.onServerConnect(userId) })
+    );
+
+    this.ctx.svr.on("activate", (caster: number, target: number) =>
+      modulesList.forEach((module) => { if (module.onActivate) module.onActivate(caster, target) })
     );
   }
 

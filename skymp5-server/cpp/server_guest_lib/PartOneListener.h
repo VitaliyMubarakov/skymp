@@ -8,6 +8,7 @@ class PartOneListener
 public:
   virtual ~PartOneListener() = default;
   virtual void OnConnect(Networking::UserId userId) = 0;
+  virtual void OnActivate(int caster, int target) = 0;
   virtual void OnDisconnect(Networking::UserId userId) = 0;
   virtual void OnCustomPacket(Networking::UserId userId,
                               const simdjson::dom::element& content) = 0;

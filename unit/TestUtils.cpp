@@ -71,6 +71,11 @@ void FakeListener::OnConnect(Networking::UserId userId)
   ss << "OnConnect(" << userId << ")" << std::endl;
 }
 
+void FakeListener::OnActivate(int caster, int target)
+{
+  ss << "OnActivate(" << caster << ", " << target << ")" << std::endl;
+}
+
 void FakeListener::OnDisconnect(Networking::UserId userId)
 {
   ss << "OnDisconnect(" << userId << ")" << std::endl;

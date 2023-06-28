@@ -81,6 +81,8 @@ public:
                     std::optional<simdjson::dom::element> args,
                     std::optional<uint32_t> formId) override;
 
+  void OnActivate(int caster, int target) override;
+
   std::string str();
 
   void clear();

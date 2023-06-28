@@ -8,6 +8,7 @@ declare interface JSModule {
   GetInfo(): string;
 
   onServerConnect?(userId: number): void;
+  onActivate?(caster: number, target: number): void;
 }
 
 declare let moduleJSPath: string;
