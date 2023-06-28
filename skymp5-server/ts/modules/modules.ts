@@ -1,17 +1,8 @@
-import * as scampNative from "../scampNative";
-import { Settings } from "../settings";
-import { System } from "../systems/system";
-import { MasterClient } from "../systems/masterClient";
-import { Spawn } from "../systems/spawn";
-import { Login } from "../systems/login";
 import { EventEmitter } from "events";
-import { pid } from "process";
 import * as fs from "fs";
 import * as chokidar from "chokidar";
 import * as path from "path";
-import * as os from "os";
 import chalk from "chalk";
-import * as manifestGen from "../manifestGen";
 import { ScampServer } from "../scampNative";
 import { BuildType, JSModule } from "./types";
 
@@ -20,20 +11,11 @@ interface SystemContext {
   gm: EventEmitter;
 }
 
-let Directory = "./data/modules";
 let modulesList: JSModule[] = [];
 
 function addJSModule(module: JSModule, path: string) {
   module.path = path;
   modulesList.push(module);
-}
-
-function getModuleByPath(path: string) {
-  let index: number = modulesList.findIndex((e) => {
-    e.path == path;
-  });
-
-  return index != -1 ? modulesList[index] : null;
 }
 
 function now() {
@@ -44,14 +26,15 @@ function now() {
 export class ModulesSystem {
   ctx: SystemContext;
 
+  readonly directory = "./data/modules";
+
   isFirstWatchPlugins: any = {};
   isModuleChange: boolean = false;
   modulesToRebuild: string[] = [];
 
   constructor(ctx: SystemContext) {
-    console.log("Modules System initialization!");
-
     this.ctx = ctx;
+    console.log("Modules System initialization!");
 
     let reloadInfo: BuildType = this.ReloadModules();
     console.log("- Modules was Build in: ", reloadInfo.time, " ms.");
@@ -142,11 +125,11 @@ export class ModulesSystem {
       modulesList = [];
     }
 
-    let currentModule: JSModule[] = [];
+    let currentModules: JSModule[] = [];
 
-    //получаем файлы модулей
-    fs.readdirSync(Directory, "utf8").forEach((moduleFolderName: any) => {
-      const Absolute = path.join(Directory, moduleFolderName);
+    //get files and load every module
+    fs.readdirSync(this.directory, "utf8").forEach((moduleFolderName: any) => {
+      const Absolute = path.join(this.directory, moduleFolderName);
       if (!fs.statSync(Absolute).isDirectory()) return;
 
       fs.readdirSync(Absolute, "utf8").forEach((moduleFileName: any) => {
@@ -163,7 +146,7 @@ export class ModulesSystem {
 
         if (fileExtension == ".js") {
           updatedModulesCount++;
-          currentModule.push(this.LoadModule(modulePath));
+          currentModules.push(this.LoadModule(modulePath));
         }
       });
     });
@@ -173,7 +156,7 @@ export class ModulesSystem {
     return {
       num: updatedModulesCount,
       time: Math.round(now() - startTime),
-      modules: currentModule,
+      modules: currentModules,
     };
   }
 

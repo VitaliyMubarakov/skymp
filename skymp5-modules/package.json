@@ -27,13 +27,5 @@
     "gettext-parser": "^5.1.2",
     "node-gettext": "^3.0.0",
     "sprintf-js": "^1.1.2"
-  },
-  "prettier": {
-    "bracketSpacing": true,
-    "printWidth": 120,
-    "semi": true,
-    "singleQuote": true,
-    "tabWidth": 2,
-    "useTabs": false
   }
 }
