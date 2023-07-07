@@ -5,6 +5,7 @@ import {
   Cell,
   Game,
   ObjectReference,
+  Spell,
   TESModPlatform,
   Ui,
   Utility,
@@ -37,6 +38,7 @@ import {
 import { isBadMenuShown } from '../sync/equipment';
 import { Inventory, applyInventory } from '../sync/inventory';
 import { Movement } from '../sync/movement';
+import { learnSpells, removeAllSpells } from '../sync/spell';
 import { ModelApplyUtils } from '../view/modelApplyUtils';
 import {
   getViewFromStorage,
@@ -116,6 +118,7 @@ const showConnectionError = () => {
 
 If you feel that something is wrong, please contact us on Discord.`,
     [255, 255, 255, 1],
+    'Tavern',
   );
 };
 
@@ -359,6 +362,24 @@ export class RemoteServer implements MsgHandler, ModelSource, SendTarget {
           inventory: (msg.props as any).inventory as Inventory,
         });
     };
+
+    if (msg.isMe && msg.props) {
+      const learnedSpells = msg.props['learnedSpells'] as Array<number>;
+
+      once('update', () => {
+        Utility.wait(1).then(() => {
+          const player = Game.getPlayer();
+
+          if (player) {
+            removeAllSpells(player);
+            learnSpells(player, learnedSpells);
+            printConsole(
+              `player learnedSpells: ${JSON.stringify(learnedSpells)}`,
+            );
+          }
+        });
+      });
+    }
 
     if (msg.isMe) {
       const task = new SpawnTask();

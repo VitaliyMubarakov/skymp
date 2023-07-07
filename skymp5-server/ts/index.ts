@@ -3,17 +3,14 @@ import * as ui from "./ui";
 import * as sourceMapSupport from "source-map-support";
 sourceMapSupport.install({
   retrieveSourceMap: function (source: string) {
-    if (source.endsWith("skymp5-server.js")) {
+    if (source.endsWith('skymp5-server.js')) {
       return {
-        url: "original.js",
-        map: require("fs").readFileSync(
-          "dist_back/skymp5-server.js.map",
-          "utf8"
-        ),
+        url: 'original.js',
+        map: require('fs').readFileSync('dist_back/skymp5-server.js.map', 'utf8')
       };
     }
     return null;
-  },
+  }
 });
 
 import * as scampNative from "./scampNative";
@@ -30,39 +27,43 @@ import * as path from "path";
 import * as os from "os";
 
 import * as manifestGen from "./manifestGen";
-import { ModulesSystem } from "./modules/modules";
 
-const { master, port, maxPlayers, name, ip, gamemodePath, offlineMode } =
-  Settings.get();
+const {
+  master,
+  port,
+  maxPlayers,
+  name,
+  ip,
+  gamemodePath,
+  offlineMode,
+} = Settings.get();
 
 const gamemodeCache = new Map<string, string>();
 
 function requireTemp(module: string) {
   // https://blog.mastykarz.nl/create-temp-directory-app-node-js/
   let tmpDir;
-  const appPrefix = "skymp5-server";
+  const appPrefix = 'skymp5-server';
   try {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), appPrefix));
 
-    const contents = fs.readFileSync(module, "utf8");
-    const tempPath = path.join(
-      tmpDir,
-      Math.random() + "-" + Date.now() + ".js"
-    );
+    const contents = fs.readFileSync(module, 'utf8');
+    const tempPath = path.join(tmpDir, Math.random() + '-' + Date.now() + '.js');
     fs.writeFileSync(tempPath, contents);
 
     require(tempPath);
-  } catch (e) {
+  }
+  catch(e) {
     console.error(e.stack);
-  } finally {
+  }
+  finally {
     try {
       if (tmpDir) {
         fs.rmSync(tmpDir, { recursive: true });
       }
-    } catch (e) {
-      console.error(
-        `An error has occurred while removing the temp folder at ${tmpDir}. Please remove it manually. Error: ${e}`
-      );
+    }
+    catch (e) {
+      console.error(`An error has occurred while removing the temp folder at ${tmpDir}. Please remove it manually. Error: ${e}`);
     }
   }
 }
@@ -111,7 +112,8 @@ systems.push(
 
 const setupStreams = (server: scampNative.ScampServer) => {
   class LogsStream {
-    constructor(private logLevel: string) {}
+    constructor(private logLevel: string) {
+    }
 
     write(chunk: Buffer, encoding: string, callback: () => void) {
       const str = chunk.toString(encoding);
@@ -122,20 +124,12 @@ const setupStreams = (server: scampNative.ScampServer) => {
     }
   }
 
-  const infoStream = new LogsStream("info");
-  const errorStream = new LogsStream("error");
-  process.stdout.write = (
-    chunk: Buffer,
-    encoding: string,
-    callback: () => void
-  ) => {
+  const infoStream = new LogsStream('info');
+  const errorStream = new LogsStream('error');
+  process.stdout.write = (chunk: Buffer, encoding: string, callback: () => void) => {
     infoStream.write(chunk, encoding, callback);
   };
-  process.stderr.write = (
-    chunk: Buffer,
-    encoding: string,
-    callback: () => void
-  ) => {
+  process.stderr.write = (chunk: Buffer, encoding: string, callback: () => void) => {
     errorStream.write(chunk, encoding, callback);
   };
 };
@@ -149,8 +143,6 @@ const main = async () => {
 
   setupStreams(server);
   console.log(`Current process ID is ${pid}`);
-
-  new ModulesSystem(ctx);
 
   (async () => {
     while (1) {

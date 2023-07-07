@@ -3,15 +3,15 @@
 Skyrim Platform is a modding tool for Skyrim allowing writing scripts with JavaScript/TypeScript.
 
 ```ts
-printConsole('Hello Platform');
+printConsole("Hello Platform");
 
-on('update', () => {
+on("update", () => {
   const gold = Game.getForm(0xf);
   const target = Game.getDialogueTarget();
   const player = Game.getPlayer();
   if (target && player && player.getItemCount(gold) >= 100) {
     player.removeItem(gold, 100, true, target);
-    Debug.notification('You have just paid to an NPC');
+    Debug.notification("You have just paid to an NPC");
   }
 });
 ```
@@ -42,6 +42,7 @@ You can get Skyrim Platform from Nexus: https://www.nexusmods.com/skyrimspeciale
   - [HTTP][]
   - [Texts][Texts]
   - [Win32][Win32]
+  - [Settings][Settings]
 - [Cook Book][Cookbook]
 
 [Browser]: skyrim_platform/browser.md
@@ -56,6 +57,7 @@ You can get Skyrim Platform from Nexus: https://www.nexusmods.com/skyrimspeciale
 [Papyrus]: skyrim_platform/papyrus.md
 [Texts]: skyrim_platform/texts.md
 [Win32]: skyrim_platform/win32.md
+[Settings]: skyrim_platform/ini_settings.md
 
 ## Versioning Notes
 

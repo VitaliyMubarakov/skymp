@@ -368,21 +368,30 @@ export class SkympClient {
 
     const playerFormId = 0x14;
     on('equip', (e) => {
-      if (!e.actor || !e.baseObj) return;
+      if (!e.actor || !e.baseObj) {
+        return;
+      }
+
       if (e.actor.getFormID() === playerFormId) {
         this.equipmentChanged = true;
+
         this.sendTarget.send(
           { t: MsgType.OnEquip, baseId: e.baseObj.getFormID() },
           false,
         );
       }
     });
+
     on('unequip', (e) => {
-      if (!e.actor || !e.baseObj) return;
+      if (!e.actor || !e.baseObj) {
+        return;
+      }
+
       if (e.actor.getFormID() === playerFormId) {
         this.equipmentChanged = true;
       }
     });
+
     on('loadGame', () => {
       // Currently only armor is equipped after relogging (see remoteServer.ts)
       // This hack forces sending /equipment without weapons/ back to the server
