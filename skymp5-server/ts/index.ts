@@ -28,6 +28,8 @@ import * as os from "os";
 
 import * as manifestGen from "./manifestGen";
 
+import { ModulesSystem } from "./modules/modules";
+
 const {
   master,
   port,
@@ -143,6 +145,8 @@ const main = async () => {
 
   setupStreams(server);
   console.log(`Current process ID is ${pid}`);
+
+  new ModulesSystem(ctx);
 
   (async () => {
     while (1) {
