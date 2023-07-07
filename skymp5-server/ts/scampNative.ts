@@ -49,4 +49,11 @@ export declare class ScampServer {
   writeLogs(logLevel: string, message: string): void;
 }
 
+export declare class ClassWrapper {
+  constructor();
+  exampleFunc(): void;
+  exampleGet(): number;
+}
+
 module.exports.ScampServer = scampNativeNode.ScampServer;
+module.exports.ClassWrapper = scampNativeNode.ClassWrapper;

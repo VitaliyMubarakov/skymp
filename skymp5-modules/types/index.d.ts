@@ -14,3 +14,4 @@ declare interface JSModule {
 declare let moduleJSPath: string;
 
 declare function addJSModule(module: JSModule, path: string);
+

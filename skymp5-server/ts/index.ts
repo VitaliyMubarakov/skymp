@@ -89,6 +89,7 @@ function requireUncached(
         // In native module we now register mp-api methods into the ScampServer class
         // This workaround allows code that is bound to global 'mp' object to run
         globalThis.mp = globalThis.mp || server;
+        globalThis.Form = scampNative.Form;
 
         requireTemp(module);
         return;
@@ -142,6 +143,12 @@ const main = async () => {
 
   const server = new scampNative.ScampServer(port, maxPlayers);
   const ctx = { svr: server, gm: new EventEmitter() };
+
+  const wrapper = new scampNative.ClassWrapper();
+  //console.log(JSON.stringify(wrapper));
+  wrapper.exampleFunc();
+  console.log("рез: ", wrapper.exampleGet());
+  
 
   setupStreams(server);
   console.log(`Current process ID is ${pid}`);
