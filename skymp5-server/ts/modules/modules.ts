@@ -71,6 +71,7 @@ function printModules(reloadInfo: BuildType) {
   const descriptionProp: string = chalk.green.underline(DescPropText);
   const authorProp: string = chalk.green.underline(AuthorPropText);
   const versionProp: string = chalk.green.underline(VersionPropText);
+
   const afterNamePropSpaces: string = ' '.repeat(NamePropSpacesCount + fieldSpacesCount);
   const afterDescPropSpaces: string = ' '.repeat(DescPropSpacesCount + fieldSpacesCount);
   const afterAuthorPropSpaces: string = ' '.repeat(AuthorPropSpacesCount + fieldSpacesCount);
@@ -119,6 +120,10 @@ export class ModulesSystem {
 
     this.ctx.svr.on("activate", (caster: number, target: number) =>
       modulesList.forEach((module: any) => { if (module.onActivate) module.onActivate(caster, target) })
+    );
+
+    this.ctx.svr.on("disconnect", (userId: number) =>
+      modulesList.forEach((module: any) => { if (module.onDisconnect) module.onDisconnect(userId) })
     );
   }
 
