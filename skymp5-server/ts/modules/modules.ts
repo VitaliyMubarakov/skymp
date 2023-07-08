@@ -46,20 +46,20 @@ function printModules(reloadInfo: BuildType) {
   const biggerAuthor: number = reloadInfo.modules.sort((a, b) => b.author.length - a.author.length)[0].author.length;
   const biggerVersion: number = reloadInfo.modules.sort((a, b) => b.version.length - a.version.length)[0].version.length;
 
-  const NamePropText: string = "Name";
-  const DescPropText: string = "Description";
-  const AuthorPropText: string = "Author";
-  const VersionPropText: string = "Version";
+  const namePropText: string = "Name";
+  const descPropText: string = "Description";
+  const authorPropText: string = "Author";
+  const versionPropText: string = "Version";
 
-  const NamePropSpacesCount : number = NamePropText.length < biggerName ? biggerName - NamePropText.length : 0;
-  const DescPropSpacesCount : number = DescPropText.length < biggerDesc ? biggerDesc - DescPropText.length : 0;
-  const AuthorPropSpacesCount : number = AuthorPropText.length < biggerAuthor ? biggerAuthor - AuthorPropText.length : 0;
-  const VersionPropSpacesCount : number = VersionPropText.length < biggerVersion ? biggerVersion - VersionPropText.length : 0;
+  const NamePropSpacesCount : number = namePropText.length < biggerName ? biggerName - namePropText.length : 0;
+  const DescPropSpacesCount : number = descPropText.length < biggerDesc ? biggerDesc - descPropText.length : 0;
+  const AuthorPropSpacesCount : number = authorPropText.length < biggerAuthor ? biggerAuthor - authorPropText.length : 0;
+  const VersionPropSpacesCount : number = versionPropText.length < biggerVersion ? biggerVersion - versionPropText.length : 0;
 
-  const NamefieldSpacesCountCount : number = NamePropText.length > biggerName ? NamePropText.length - biggerName : 0;
-  const DescfieldSpacesCountCount : number = DescPropText.length > biggerDesc ? DescPropText.length - biggerDesc : 0;
-  const AuthorfieldSpacesCountCount : number = AuthorPropText.length > biggerAuthor ? AuthorPropText.length - biggerAuthor : 0;
-  const VersionfieldSpacesCountCount: number = VersionPropText.length > biggerVersion ? VersionPropText.length - biggerVersion : 0;
+  const NamefieldSpacesCount : number = namePropText.length > biggerName ? namePropText.length - biggerName : 0;
+  const DescfieldSpacesCount : number = descPropText.length > biggerDesc ? descPropText.length - biggerDesc : 0;
+  const AuthorfieldSpacesCount : number = authorPropText.length > biggerAuthor ? authorPropText.length - biggerAuthor : 0;
+  const VersionfieldSpacesCount: number = versionPropText.length > biggerVersion ? versionPropText.length - biggerVersion : 0;
 
   const startSpacesCount: number = 4;
   const fieldSpacesCount: number = 1;
@@ -67,10 +67,10 @@ function printModules(reloadInfo: BuildType) {
   const startSpaces: string = ' '.repeat(startSpacesCount);
   const fieldSpaces: string = ' '.repeat(fieldSpacesCount);
 
-  const nameProp: string = chalk.green.underline(NamePropText);
-  const descriptionProp: string = chalk.green.underline(DescPropText);
-  const authorProp: string = chalk.green.underline(AuthorPropText);
-  const versionProp: string = chalk.green.underline(VersionPropText);
+  const nameProp: string = chalk.green.underline(namePropText);
+  const descriptionProp: string = chalk.green.underline(descPropText);
+  const authorProp: string = chalk.green.underline(authorPropText);
+  const versionProp: string = chalk.green.underline(versionPropText);
 
   const afterNamePropSpaces: string = ' '.repeat(NamePropSpacesCount + fieldSpacesCount);
   const afterDescPropSpaces: string = ' '.repeat(DescPropSpacesCount + fieldSpacesCount);
@@ -82,10 +82,10 @@ function printModules(reloadInfo: BuildType) {
   console.log(output);
 
   reloadInfo.modules.forEach((e) => {
-    const nameSpaces: string = ' '.repeat(biggerName - e.moduleName.length + NamefieldSpacesCountCount + fieldSpacesCount);
-    const descSpaces: string = ' '.repeat(biggerDesc - e.description.length + DescfieldSpacesCountCount + fieldSpacesCount);
-    const authorSpaces: string = ' '.repeat(biggerAuthor - e.author.length + AuthorfieldSpacesCountCount + fieldSpacesCount);
-    const versionSpaces: string = ' '.repeat(biggerVersion - e.version.length + VersionfieldSpacesCountCount + fieldSpacesCount);
+    const nameSpaces: string = ' '.repeat(biggerName - e.moduleName.length + NamefieldSpacesCount + fieldSpacesCount);
+    const descSpaces: string = ' '.repeat(biggerDesc - e.description.length + DescfieldSpacesCount + fieldSpacesCount);
+    const authorSpaces: string = ' '.repeat(biggerAuthor - e.author.length + AuthorfieldSpacesCount + fieldSpacesCount);
+    const versionSpaces: string = ' '.repeat(biggerVersion - e.version.length + VersionfieldSpacesCount + fieldSpacesCount);
 
     console.log(`${startSpaces}|${fieldSpaces}${e.moduleName}${nameSpaces}|${fieldSpaces}${e.description}${descSpaces}|${fieldSpaces}${e.author}${authorSpaces}|${fieldSpaces}${e.version}${versionSpaces}|`);
   });
@@ -243,7 +243,6 @@ export class ModulesSystem {
         );
         return null;
       }
-      console.log(moduleName);
 
       eval(fs.readFileSync("./" + moduleJSPath, "utf8"));
       return modulesList[modulesList.length - 1];
