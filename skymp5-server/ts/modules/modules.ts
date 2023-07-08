@@ -19,10 +19,6 @@ export class JSModule {
     this.version = JSModuleData.version;
   }
 
-  GetInfo(): string {
-    return `Module: ${this.moduleName} | Description: ${this.description} | Author: ${this.author} | Version: ${this.version} `;
-  }
-
 }
 
 export type BuildType = { num: number; time: number; modules: JSModule[] };
