@@ -1,12 +1,4 @@
-declare interface JSModule {
-  moduleName?: string;
-  description?: string;
-  author?: string;
-  version?: string;
-  path?: string;
-
-  GetInfo(): string;
-
+declare interface IJSModule {
   onServerConnect?(userId: number): void;
   onActivate?(caster: number, target: number): void;
 }

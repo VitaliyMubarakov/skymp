@@ -4,7 +4,28 @@ import * as chokidar from "chokidar";
 import * as path from "path";
 import chalk from "chalk";
 import { ScampServer } from "../scampNative";
-import { BuildType, JSModule } from "./types";
+
+export class JSModule {
+  moduleName: string;
+  description: string;
+  author: string;
+  version: string;
+  path: string;
+
+  constructor(JSModuleData: any) {
+    this.moduleName = JSModuleData.name.replace(/\w/, (c: string) => c.toUpperCase());
+    this.description = JSModuleData.description.replace(/\w/, (c: string) => c.toUpperCase());
+    this.author = JSModuleData.author;
+    this.version = JSModuleData.version;
+  }
+
+  GetInfo(): string {
+    return `Module: ${this.moduleName} | Description: ${this.description} | Author: ${this.author} | Version: ${this.version} `;
+  }
+
+}
+
+export type BuildType = { num: number; time: number; modules: JSModule[] };
 
 interface SystemContext {
   svr: ScampServer;
@@ -23,6 +44,57 @@ function now() {
   return hrTime[0] * 1000 + hrTime[1] / 1000000;
 }
 
+function printModules(reloadInfo: BuildType) {
+  const biggerName: number = reloadInfo.modules.sort((a, b) => b.moduleName.length - a.moduleName.length)[0].moduleName.length;
+  const biggerDesc: number = reloadInfo.modules.sort((a, b) => b.description.length - a.description.length)[0].description.length;
+  const biggerAuthor: number = reloadInfo.modules.sort((a, b) => b.author.length - a.author.length)[0].author.length;
+  const biggerVersion: number = reloadInfo.modules.sort((a, b) => b.version.length - a.version.length)[0].version.length;
+
+  const NamePropText: string = "Name";
+  const DescPropText: string = "Description";
+  const AuthorPropText: string = "Author";
+  const VersionPropText: string = "Version";
+
+  const NamePropSpacesCount : number = NamePropText.length < biggerName ? biggerName - NamePropText.length : 0;
+  const DescPropSpacesCount : number = DescPropText.length < biggerDesc ? biggerDesc - DescPropText.length : 0;
+  const AuthorPropSpacesCount : number = AuthorPropText.length < biggerAuthor ? biggerAuthor - AuthorPropText.length : 0;
+  const VersionPropSpacesCount : number = VersionPropText.length < biggerVersion ? biggerVersion - VersionPropText.length : 0;
+
+  const NamefieldSpacesCountCount : number = NamePropText.length > biggerName ? NamePropText.length - biggerName : 0;
+  const DescfieldSpacesCountCount : number = DescPropText.length > biggerDesc ? DescPropText.length - biggerDesc : 0;
+  const AuthorfieldSpacesCountCount : number = AuthorPropText.length > biggerAuthor ? AuthorPropText.length - biggerAuthor : 0;
+  const VersionfieldSpacesCountCount: number = VersionPropText.length > biggerVersion ? VersionPropText.length - biggerVersion : 0;
+
+  const startSpacesCount: number = 4;
+  const fieldSpacesCount: number = 1;
+
+  const startSpaces: string = ' '.repeat(startSpacesCount);
+  const fieldSpaces: string = ' '.repeat(fieldSpacesCount);
+
+  const nameProp: string = chalk.green.underline(NamePropText);
+  const descriptionProp: string = chalk.green.underline(DescPropText);
+  const authorProp: string = chalk.green.underline(AuthorPropText);
+  const versionProp: string = chalk.green.underline(VersionPropText);
+  const afterNamePropSpaces: string = ' '.repeat(NamePropSpacesCount + fieldSpacesCount);
+  const afterDescPropSpaces: string = ' '.repeat(DescPropSpacesCount + fieldSpacesCount);
+  const afterAuthorPropSpaces: string = ' '.repeat(AuthorPropSpacesCount + fieldSpacesCount);
+  const afterVersionPropSpaces: string = ' '.repeat(VersionPropSpacesCount + fieldSpacesCount);
+
+  const output: string = `${startSpaces}|${fieldSpaces}${nameProp}${afterNamePropSpaces}|${fieldSpaces}${descriptionProp}${afterDescPropSpaces}|${fieldSpaces}${authorProp}${afterAuthorPropSpaces}|${fieldSpaces}${versionProp}${afterVersionPropSpaces}|`;
+
+  console.log(output);
+
+  reloadInfo.modules.forEach((e) => {
+    const nameSpaces: string = ' '.repeat(biggerName - e.moduleName.length + NamefieldSpacesCountCount + fieldSpacesCount);
+    const descSpaces: string = ' '.repeat(biggerDesc - e.description.length + DescfieldSpacesCountCount + fieldSpacesCount);
+    const authorSpaces: string = ' '.repeat(biggerAuthor - e.author.length + AuthorfieldSpacesCountCount + fieldSpacesCount);
+    const versionSpaces: string = ' '.repeat(biggerVersion - e.version.length + VersionfieldSpacesCountCount + fieldSpacesCount);
+
+    console.log(`${startSpaces}|${fieldSpaces}${e.moduleName}${nameSpaces}|${fieldSpaces}${e.description}${descSpaces}|${fieldSpaces}${e.author}${authorSpaces}|${fieldSpaces}${e.version}${versionSpaces}|`);
+  });
+
+}
+
 export class ModulesSystem {
   ctx: SystemContext;
 
@@ -39,20 +111,18 @@ export class ModulesSystem {
     let reloadInfo: BuildType = this.ReloadModules();
     console.log("- Modules was Build in: ", reloadInfo.time, " ms.");
     console.log("- Loaded modules count: ", modulesList.length);
-    reloadInfo.modules.forEach((e) => {
-      console.log("    • ", e.GetInfo());
-    });
+    printModules(reloadInfo);
 
     this.initHotReload();
   }
 
   initEvents() {
     this.ctx.svr.on("connect", (userId: number) =>
-      modulesList.forEach((module) => { if (module.onServerConnect) module.onServerConnect(userId) })
+      modulesList.forEach((module: any) => { if (module.onServerConnect) module.onServerConnect(userId) })
     );
 
     this.ctx.svr.on("activate", (caster: number, target: number) =>
-      modulesList.forEach((module) => { if (module.onActivate) module.onActivate(caster, target) })
+      modulesList.forEach((module: any) => { if (module.onActivate) module.onActivate(caster, target) })
     );
   }
 
@@ -77,9 +147,7 @@ export class ModulesSystem {
 
         console.log("- Modules was rebuild in: ", reloadInfo.time, " ms.");
         console.log("- Updated modules count: ", reloadInfo.num);
-        reloadInfo.modules.forEach((e) => {
-          console.log("    • ", e.GetInfo());
-        });
+        printModules(reloadInfo);
 
         console.log("- Loaded modules count: ", modulesList.length);
       }, 500);
@@ -174,6 +242,8 @@ export class ModulesSystem {
         );
         return null;
       }
+      console.log(moduleName);
+
       eval(fs.readFileSync("./" + moduleJSPath, "utf8"));
       return modulesList[modulesList.length - 1];
     } catch (err) {
