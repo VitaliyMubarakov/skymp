@@ -144,11 +144,11 @@ const main = async () => {
   const server = new scampNative.ScampServer(port, maxPlayers);
   const ctx = { svr: server, gm: new EventEmitter() };
 
-  const wrapper = new scampNative.ClassWrapper();
+  //const wrapper = new scampNative.ClassWrapper();
   //console.log(JSON.stringify(wrapper));
-  wrapper.exampleFunc();
-  console.log("рез: ", wrapper.exampleGet());
-  
+  //wrapper.exampleFunc();
+  //console.log("рез: ", wrapper.exampleGet());
+
 
   setupStreams(server);
   console.log(`Current process ID is ${pid}`);
@@ -191,6 +191,11 @@ const main = async () => {
         console.error(e);
       }
     }
+  });
+
+  server.on("activate", (caster: any, target: any) => {
+    console.log(Object.getOwnPropertyNames(target.__proto__));
+    target.Disable();
   });
 
   server.on("disconnect", (userId: number) => {

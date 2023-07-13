@@ -106,9 +106,10 @@ if (Array.isArray(storage['eventSourceContexts'])) {
 //
 //
 
+let textConnectionError = -1;
 const showConnectionError = () => {
   // TODO: unhardcode it or render via browser
-  sp.createText(
+  textConnectionError = sp.createText(
     1920 / 2,
     1080 / 2,
     `Server connection failed. This may be caused by one of the following:
@@ -130,6 +131,10 @@ on('tick', () => {
     showConnectionError();
     networking.reconnect();
     loggingStartMoment = 0;
+  }
+  if (sp.mpClientPlugin.isConnected() && textConnectionError != -1) {
+    sp.destroyText(textConnectionError);
+    textConnectionError = -1;
   }
 });
 
