@@ -19,7 +19,6 @@
 #include "formulas/SweetPieDamageFormula.h"
 #include "formulas/TES5DamageFormula.h"
 #include "property_bindings/PropertyBindingFactory.h"
-#include "ClassWrapper.h"
 #include <cassert>
 #include <cctype>
 #include <memory>
@@ -108,7 +107,6 @@ Napi::Object ScampServer::Init(Napi::Env env, Napi::Object exports)
   constructor = Napi::Persistent(func);
   constructor.SuppressDestruct();
   exports.Set("ScampServer", func);
-  
   return exports;
 }
 
@@ -195,10 +193,10 @@ ScampServer::ScampServer(const Napi::CallbackInfo& info)
     auto realServer = Networking::CreateServer(
       static_cast<uint32_t>(port), static_cast<uint32_t>(maxConnections),
       password.data());
-    
+
     static_assert(kMockServerIdx == 1);
     server = Networking::CreateCombinedServer({ realServer, serverMock });
-    
+
     partOne->SetSendTarget(server.get());
 
     const auto& sweetPieDamageFormulaSettings =
@@ -239,8 +237,6 @@ ScampServer::ScampServer(const Napi::CallbackInfo& info)
 
     emitter = Napi::Persistent(res.As<Napi::Object>());
     emit = Napi::Persistent(emitter.Value().Get("emit").As<Napi::Function>());
-
-    ClassWrapper::SetPartOne(partOne);
   } catch (std::exception& e) {
     throw Napi::Error::New(info.Env(), (std::string)e.what());
   }
