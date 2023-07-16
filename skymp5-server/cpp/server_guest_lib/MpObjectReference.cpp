@@ -465,8 +465,21 @@ void MpObjectReference::SetCellOrWorld(const FormDesc& newWorldOrCell)
 
 void MpObjectReference::Disable()
 {
-  if (ChangeForm().isDisabled)
-    return;
+  for (auto listener : this->GetListeners()) {
+    auto targetRefr = dynamic_cast<MpActor*>(listener);
+    if (targetRefr) {
+      SpSnippet("objectreference", "Disable", "[false]",
+                this->GetFormId())
+        .Execute(targetRefr);
+    }
+  }
+
+
+
+  std::cout << "чисто snippet" << std::endl;
+
+  //if (ChangeForm().isDisabled)
+  //  return;
 
   EditChangeForm(
     [&](MpChangeFormREFR& changeForm) { changeForm.isDisabled = true; });
