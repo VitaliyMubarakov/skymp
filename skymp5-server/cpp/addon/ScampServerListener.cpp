@@ -1,6 +1,5 @@
 #include "ScampServerListener.h"
 #include "ScampServer.h"
-#include "ClassWrapper.h"
 
 ScampServerListener::ScampServerListener(ScampServer& scampServer_)
   : server(scampServer_)
@@ -42,14 +41,10 @@ void ScampServerListener::OnActivate(int caster, int target)
 {
   auto& env = server.tickEnv;
   auto emit = server.emit.Value();
-  
   emit.Call(server.emitter.Value(),
-            {
-              Napi::String::New(env, "activate"),
-            ClassWrapper::Constructor(Napi::Number::New(env, target)),
-              ClassWrapper::Constructor(Napi::Number::New(env, target))
-            }
-           );
+            { Napi::String::New(env, "activate"),
+              Napi::Number::New(env, caster),
+              Napi::Number::New(env, target) });
 }
 
 bool ScampServerListener::OnMpApiEvent(
