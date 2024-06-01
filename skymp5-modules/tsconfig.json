@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "noEmitOnError": true
+  },
+  "include": ["modules", "types"]
+}

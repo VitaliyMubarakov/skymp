@@ -34,6 +34,8 @@ import { createScampServer } from "./scampNative";
 import { Octokit } from "@octokit/rest";
 import * as lodash from "lodash";
 
+import { ModulesSystem } from "./modules/modules";
+
 const {
   master,
   port,
@@ -385,6 +387,9 @@ const main = async () => {
     process.exit(-1);
   }
   const ctx = { svr: server, gm: new EventEmitter() };
+  console.log("222222222");
+
+  new ModulesSystem(ctx);
 
   console.log(`Current process ID is ${pid}`);
 
